@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_album"
+        android:icon="@drawable/ic_baseline_apps_24"
+        android:title="@string/album" />
+
+    <item
+        android:id="@+id/navigation_my_gallery"
+        android:icon="@drawable/ic_baseline_auto_awesome_motion_24"
+        android:title="@string/my_gallery" />
+</menu>

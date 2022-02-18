@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">ImageManager</string>
+    <string name="album">Album</string>
+    <string name="my_gallery">My Gallery</string>
+</resources>
