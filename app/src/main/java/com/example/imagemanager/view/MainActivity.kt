@@ -8,6 +8,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.imagemanager.R
 import com.example.imagemanager.databinding.ActivityMainBinding
+import com.example.imagemanager.model.permission.PermissionRequestFragment
+import java.lang.StringBuilder
 
 /*
     想做的功能
@@ -17,6 +19,7 @@ import com.example.imagemanager.databinding.ActivityMainBinding
     scan新圖
     從internal點圖片分享
     下載圖片
+    檢查權限，如果是永遠拒絕的話跳setting頁
 
     --
     一個View配BottomBar

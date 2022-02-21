@@ -2,4 +2,10 @@
     <string name="app_name">ImageManager</string>
     <string name="album">Album</string>
     <string name="my_gallery">My Gallery</string>
+    <string name="permission_explain_location">The app need always allow location permission to locate your location even close screen or using other app.</string>
+    <string name="permission_explain_camera">The app need camera permission call camera.</string>
+    <string name="permission_explain_write_external_storage">The app need write external storage permission to save file.</string>
+    <string name="permission_explain_read_external_storage">The app need read external storage permission to read file.</string>
+    <string name="no_thanks">no thanks</string>
+    <string name="ok">ok</string>
 </resources>

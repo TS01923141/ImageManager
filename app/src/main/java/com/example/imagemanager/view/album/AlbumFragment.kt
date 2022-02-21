@@ -8,6 +8,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import com.example.imagemanager.databinding.FragmentAlbumBinding
+import com.example.imagemanager.model.extend.checkAndRequestPermission
+import com.example.imagemanager.model.permission.PermissionRequestFragment
 
 class AlbumFragment: Fragment() {
     private val viewModel : AlbumViewModel by viewModels()
@@ -23,7 +25,6 @@ class AlbumFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.recyclerViewAlbum.apply {
             adapter = AlbumAdapter() {
-
             }
         }
 
@@ -31,7 +32,14 @@ class AlbumFragment: Fragment() {
             images.observe(this@AlbumFragment, { images ->
                 (binding.recyclerViewAlbum.adapter as AlbumAdapter).submitList(images)})
         }
-        viewModel.loadImages()
+        //check permission and load data
+        val list = arrayListOf(
+            PermissionRequestFragment.WRITE_EXTERNAL_STORAGE,
+            PermissionRequestFragment.READ_EXTERNAL_STORAGE
+        )
+        requireActivity().checkAndRequestPermission(list) {
+            if (it) viewModel.loadImages()
+        }
     }
 
     override fun onDestroyView() {

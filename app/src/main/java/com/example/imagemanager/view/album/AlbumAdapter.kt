@@ -20,9 +20,14 @@ class AlbumAdapter(val onClick: (MediaStoreImage) -> Unit) :
         if (item != null) (holder as AlbumViewHolder).bind(item)
     }
 
-    class AlbumViewHolder(private val binding: ItemImageBinding): RecyclerView.ViewHolder(binding.root) {
+    inner class AlbumViewHolder(private val binding: ItemImageBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(item: MediaStoreImage) {
-            binding.imageViewImage.load(item.contentUri)
+            binding.apply {
+                imageViewImage.load(item.contentUri)
+                constraintLayoutImageFrame.setOnClickListener {
+                    onClick.invoke(item)
+                }
+            }
         }
     }
 }
