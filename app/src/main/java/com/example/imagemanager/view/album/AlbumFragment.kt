@@ -1,9 +1,11 @@
 package com.example.imagemanager.view.album
 
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -34,8 +36,10 @@ class AlbumFragment: Fragment() {
         }
         //check permission and load data
         val list = arrayListOf(
-            PermissionRequestFragment.WRITE_EXTERNAL_STORAGE,
-            PermissionRequestFragment.READ_EXTERNAL_STORAGE
+            //依照sdk版本決定要哪個讀取的權限
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+                PermissionRequestFragment.MANAGE_EXTERNAL_STORAGE_PERMISSION
+                else PermissionRequestFragment.READ_EXTERNAL_STORAGE
         )
         requireActivity().checkAndRequestPermission(list) {
             if (it) viewModel.loadImages()

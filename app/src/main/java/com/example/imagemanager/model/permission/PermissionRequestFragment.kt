@@ -1,14 +1,22 @@
 package com.example.imagemanager.model.permission
 
+import android.app.Activity
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.setFragmentResult
@@ -35,6 +43,8 @@ import com.example.imagemanager.R
     檢查有未通過回傳false跟dinedList
  */
 private const val PERMISSION_LIST = "permission_list"
+const val MANAGE_EXTERNAL_STORAGE_PERMISSION_REQUEST = 1
+const val READ_EXTERNAL_STORAGE_PERMISSION_REQUEST = 2
 
 class PermissionRequestFragment : Fragment() {
 
@@ -45,7 +55,10 @@ class PermissionRequestFragment : Fragment() {
         const val FINE_LOCATION = android.Manifest.permission.ACCESS_FINE_LOCATION
         const val WRITE_EXTERNAL_STORAGE = android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         const val READ_EXTERNAL_STORAGE = android.Manifest.permission.READ_EXTERNAL_STORAGE
+        const val MANAGE_EXTERNAL_STORAGE_PERMISSION = android.Manifest.permission.MANAGE_EXTERNAL_STORAGE
         const val CAMERA = android.Manifest.permission.CAMERA
+        //0-> no, 1 -> in setting view, 2 -> back this view
+        var inSettingView = 0
 
         fun newInstance(permissionList: ArrayList<String>): PermissionRequestFragment {
             val f = PermissionRequestFragment()
@@ -74,6 +87,16 @@ class PermissionRequestFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         //we don't need view.
         return null
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (inSettingView == 1) {
+            inSettingView++
+        } else if (inSettingView == 2) {
+            inSettingView = 0
+            checkAndRequestPermission(requestPermissionList.first())
+        }
     }
 
     //permission
@@ -127,7 +150,15 @@ class PermissionRequestFragment : Fragment() {
                 } else {
                     //first denied show dialog, other times request again.
                     if (deniedCount == 1) showExplainPermissionDialog(currentCheckingPermission)
-                    else checkAndRequestPermission(currentCheckingPermission)
+                    else {
+                        val showRationale = ActivityCompat.shouldShowRequestPermissionRationale(requireActivity()
+                            , currentCheckingPermission)
+                        if (showRationale) {
+                            checkAndRequestPermission(currentCheckingPermission)
+                        } else {
+                            openPermissionSettings(requireActivity())
+                        }
+                    }
                 }
             }
         }
@@ -160,5 +191,28 @@ class PermissionRequestFragment : Fragment() {
             READ_EXTERNAL_STORAGE -> requireContext().getString(R.string.permission_explain_read_external_storage)
             else -> ""
         }
+    }
+
+    //utils
+    fun openPermissionSettings(activity: Activity) {
+        inSettingView = 1
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            requestStoragePermissionApi30()
+        }
+        else {
+            activity.startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", activity.packageName, null)
+                )
+            )
+        }
+    }
+
+    @RequiresApi(30)
+    fun requestStoragePermissionApi30() {
+        val intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {}.launch(intent)
+//        startActivityForResult(intent, MANAGE_EXTERNAL_STORAGE_PERMISSION_REQUEST)
     }
 }
