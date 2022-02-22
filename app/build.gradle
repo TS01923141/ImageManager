@@ -58,10 +58,10 @@ dependencies {
     //coil
     implementation("io.coil-kt:coil:1.4.0")
     //ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
-    implementation 'androidx.fragment:fragment-ktx:1.4.0'
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+    implementation 'androidx.fragment:fragment-ktx:1.4.1'
     //LiveData
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.4.1")
     //okhttp
     // define a BOM and its version
     implementation(platform("com.squareup.okhttp3:okhttp-bom:4.9.0"))

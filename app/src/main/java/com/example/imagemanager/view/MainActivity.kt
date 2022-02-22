@@ -38,6 +38,10 @@ import java.lang.StringBuilder
     分區儲存檢測
  */
 
+/*
+    Album -> 顯示手機內所有圖片，點圖分享
+    MyGallery -> 選圖加到app內部資料夾，之後作為相簿圖片顯示，點圖刪除
+ */
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
 
@@ -50,4 +54,5 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.navHostFrag_main)
         binding.navViewMain.setupWithNavController(navController)
     }
+
 }
