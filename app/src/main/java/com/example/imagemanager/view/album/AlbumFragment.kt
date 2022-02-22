@@ -1,5 +1,6 @@
 package com.example.imagemanager.view.album
 
+import android.content.DialogInterface
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,9 +10,12 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import com.example.imagemanager.R
 import com.example.imagemanager.databinding.FragmentAlbumBinding
+import com.example.imagemanager.model.MediaStoreImage
 import com.example.imagemanager.model.extend.checkAndRequestPermission
 import com.example.imagemanager.model.permission.PermissionRequestFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class AlbumFragment: Fragment() {
     private val viewModel : AlbumViewModel by viewModels()
@@ -27,6 +31,7 @@ class AlbumFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.recyclerViewAlbum.apply {
             adapter = AlbumAdapter() {
+                deleteImage(it)
             }
         }
 
@@ -49,5 +54,20 @@ class AlbumFragment: Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+
+    //跳dialog，確定刪除的話交由viewModel.deleteImage()處理
+    private fun deleteImage(image: MediaStoreImage) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.delete_dialog_title)
+            .setMessage(getString(R.string.delete_dialog_message, image.displayName))
+            .setPositiveButton(R.string.delete_dialog_positive) { _: DialogInterface, _: Int ->
+                viewModel.deleteImage(image)
+            }
+            .setNegativeButton(R.string.delete_dialog_negative) { dialog: DialogInterface, _: Int ->
+                dialog.dismiss()
+            }
+            .show()
     }
 }

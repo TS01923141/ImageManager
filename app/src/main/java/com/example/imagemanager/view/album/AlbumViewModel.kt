@@ -2,12 +2,15 @@ package com.example.imagemanager.view.album
 
 import android.annotation.SuppressLint
 import android.app.Application
+import android.app.RecoverableSecurityException
 import android.content.ContentProvider
 import android.content.ContentResolver
 import android.content.ContentUris
+import android.content.IntentSender
 import android.database.ContentObserver
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.provider.MediaStore
 import android.util.Log
@@ -29,6 +32,10 @@ class AlbumViewModel @Inject constructor(app: Application): AndroidViewModel(app
     val images: LiveData<List<MediaStoreImage>> get() = _images
 
     private var contentObserver: ContentObserver? = null
+
+    private var pendingDeleteImage: MediaStoreImage? = null
+    private val _permissionNeededForDelete = MutableLiveData<IntentSender?>()
+    val permissionNeededForDelete: LiveData<IntentSender?> = _permissionNeededForDelete
 
     /**
      * 讀圖與設定內容改變時自動讀圖加載
@@ -328,5 +335,58 @@ class AlbumViewModel @Inject constructor(app: Application): AndroidViewModel(app
         //ex.設為為content://123，改變的為content://123/456，設為false的情況下就不會通知
         registerContentObserver(uri, true, contentObserver)
         return contentObserver
+    }
+
+    fun deleteImage(image: MediaStoreImage) {
+        viewModelScope.launch {
+            performDeleteImage(image)
+        }
+    }
+
+    private suspend fun performDeleteImage(image: MediaStoreImage) {
+        //跳到IO Thread
+        withContext(Dispatchers.IO) {
+            try {
+                /**
+                 * 在Android Q以上無法直接修改或刪除MediaStore的檔案，而且需要明確的permission
+                 *
+                 * In [Build.VERSION_CODES.Q] and above, it isn't possible to modify
+                 * or delete items in MediaStore directly, and explicit permission
+                 * must usually be obtained to do this.
+                 *
+                 * 這裡的執行方式是藉由捕捉[RecoverableSecurityException]，通過[IntentSender]讓activity可以
+                 * 提示使用者給予權限來更新或刪除
+                 *
+                 * The way it works is the OS will throw a [RecoverableSecurityException],
+                 * which we can catch here. Inside there's an [IntentSender] which the
+                 * activity can use to prompt the user to grant permission to the item
+                 * so it can be either updated or deleted.
+                 */
+                //嘗試透過Uri刪除檔案
+                getApplication<Application>().contentResolver.delete(
+                    image.contentUri,
+                    "${MediaStore.Images.Media._ID} = ?",
+                    arrayOf(image.id.toString())
+                )
+            } catch (securityException: SecurityException) {
+                //Android Q以上時
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    //看是不是recoverableSecurityException，不是就拋出
+                    val recoverableSecurityException =
+                        securityException as? RecoverableSecurityException
+                            ?: throw securityException
+
+                    // 向Activity發出信號，需要permission，如果成功將再次嘗試刪除
+                    // Signal to the Activity that it needs to request permission and
+                    // try the delete again if it succeeds.
+                    pendingDeleteImage = image
+                    _permissionNeededForDelete.postValue(
+                        recoverableSecurityException.userAction.actionIntent.intentSender
+                    )
+                } else {
+                    throw securityException
+                }
+            }
+        }
     }
 }

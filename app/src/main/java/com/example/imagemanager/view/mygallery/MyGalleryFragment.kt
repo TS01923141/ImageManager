@@ -1,10 +1,7 @@
 package com.example.imagemanager.view.mygallery
 
 import android.app.Activity
-import android.content.ContentResolver
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -12,15 +9,18 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.FileProvider
 import androidx.core.content.edit
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.transaction
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.viewModelScope
 import com.example.imagemanager.databinding.FragmentMyGalleryBinding
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /*
 
@@ -45,7 +45,7 @@ class MyGalleryFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             recyclerViewMyGallery.adapter = MyGalleryAdapter() {
-
+                viewImageUsingExternalApp(it)
             }
             buttonMyGallery.setOnClickListener {
                 openDocumentPicker()
@@ -124,5 +124,23 @@ class MyGalleryFragment: Fragment() {
             addCategory(Intent.CATEGORY_OPENABLE)
         }
         documentPickerResult.launch(intent)
+    }
+
+    //呼叫外部app開啟圖片
+    private fun viewImageUsingExternalApp(imageFile: File) {
+        val context = requireContext()
+        val authority = "${context.packageName}.fileprovider"
+        val contentUri = FileProvider.getUriForFile(context, authority, imageFile)
+
+        val viewIntent = Intent(Intent.ACTION_VIEW).apply {
+            data = contentUri
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        try {
+            startActivity(viewIntent)
+        } catch (e: ActivityNotFoundException) {
+            Snackbar.make(binding.root, "Couldn't find suitable app to display the image", Snackbar.LENGTH_SHORT).show()
+        }
     }
 }
