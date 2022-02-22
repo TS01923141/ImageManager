@@ -54,17 +54,19 @@ class MyGalleryViewModel(app: Application): AndroidViewModel(app) {
 }
 
 private fun getImagesFolder(context: Context): File {
-    //取得xml
-    val xml = context.resources.getXml(R.xml.filepaths)
-
-    //取得所有FILEPATH_XML_KEY在xml內的參數
-    val attributes = getAttributesFromXmlNode(xml, FILEPATH_XML_KEY)
-
-    val folderPath = attributes["path"]
-        ?: error("You have to specify the sharable directory in res/xml/filepaths.xml")
+//    //取得xml
+//    val xml = context.resources.getXml(R.xml.filepaths)
+//
+//    //取得所有FILEPATH_XML_KEY在xml內的參數
+//    val attributes = getAttributesFromXmlNode(xml, FILEPATH_XML_KEY)
+//
+//    val folderPath = attributes["path"]
+//        ?: error("You have to specify the sharable directory in res/xml/filepaths.xml")
 
     //建立並回傳資料夾File
-    return File(context.filesDir, folderPath).also {
+//    return File(context.filesDir, folderPath).also {
+    //這邊隨意，不用上面方法也沒差
+    return File(context.filesDir, "images/").also {
         if (!it.exists()) {
             it.mkdir()
         }
