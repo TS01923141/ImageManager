@@ -1,12 +1,15 @@
 package com.example.imagemanager.view.album
 
 import android.content.DialogInterface
+import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.app.ActivityCompat
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -16,6 +19,7 @@ import com.example.imagemanager.model.MediaStoreImage
 import com.example.imagemanager.model.extend.checkAndRequestPermission
 import com.example.imagemanager.model.permission.PermissionRequestFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.io.File
 
 class AlbumFragment: Fragment() {
     private val viewModel : AlbumViewModel by viewModels()
@@ -31,7 +35,8 @@ class AlbumFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.recyclerViewAlbum.apply {
             adapter = AlbumAdapter() {
-                deleteImage(it)
+//                deleteImage(it)
+                shareImage(it.contentUri)
             }
         }
 
@@ -69,5 +74,14 @@ class AlbumFragment: Fragment() {
                 dialog.dismiss()
             }
             .show()
+    }
+
+    //分享圖片
+    private fun shareImage(imageUri: Uri) {
+        val i = Intent(Intent.ACTION_SEND)
+        i.type = "image/*"
+        i.putExtra(Intent.EXTRA_STREAM, imageUri)
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(Intent.createChooser(i, "Share Image"))
     }
 }

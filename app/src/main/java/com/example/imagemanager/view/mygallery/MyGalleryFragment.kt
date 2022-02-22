@@ -2,7 +2,6 @@ package com.example.imagemanager.view.mygallery
 
 import android.app.Activity
 import android.content.*
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,17 +9,13 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
-import androidx.core.content.edit
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.transaction
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.viewModelScope
 import com.example.imagemanager.databinding.FragmentMyGalleryBinding
 import com.google.android.material.snackbar.Snackbar
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
+import android.content.Intent
+
 
 /*
 
@@ -45,7 +40,10 @@ class MyGalleryFragment: Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.apply {
             recyclerViewMyGallery.adapter = MyGalleryAdapter() {
+                //開啟圖片
                 viewImageUsingExternalApp(it)
+                //分享圖片
+//                shareImage(it)
             }
             buttonMyGallery.setOnClickListener {
                 openDocumentPicker()
@@ -142,5 +140,18 @@ class MyGalleryFragment: Fragment() {
         } catch (e: ActivityNotFoundException) {
             Snackbar.make(binding.root, "Couldn't find suitable app to display the image", Snackbar.LENGTH_SHORT).show()
         }
+    }
+
+    //分享圖片
+    private fun shareImage(imageFile: File) {
+        val context = requireContext()
+        val authority = "${context.packageName}.fileprovider"
+        val contentUri = FileProvider.getUriForFile(context, authority, imageFile)
+
+        val i = Intent(Intent.ACTION_SEND)
+        i.type = "image/*"
+        i.putExtra(Intent.EXTRA_STREAM, contentUri)
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        startActivity(Intent.createChooser(i, "Share Image"))
     }
 }
